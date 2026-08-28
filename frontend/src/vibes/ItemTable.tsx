@@ -5,25 +5,25 @@
 import React from "react";
 import { COLORS } from "../constants/colors";
 
-interface Column {
+interface Column<T extends Record<string, unknown>> {
   key: string;
   header: string;
   align?: "left" | "center" | "right";
   width?: string;
-  render?: (item: any) => React.ReactNode;
+  render?: (item: T) => React.ReactNode;
 }
 
-interface ItemTableProps {
-  columns: Column[];
-  data: any[];
+interface ItemTableProps<T extends Record<string, unknown>> {
+  columns: Column<T>[];
+  data: T[];
   emptyMessage?: string;
 }
 
-export function ItemTable({
+export function ItemTable<T extends Record<string, unknown>>({
   columns,
   data,
   emptyMessage = "No data available",
-}: ItemTableProps) {
+}: ItemTableProps<T>) {
   const tableStyle: React.CSSProperties = {
     width: "100%",
     borderCollapse: "collapse",
@@ -96,7 +96,7 @@ export function ItemTable({
               >
                 {column.render
                   ? column.render(item)
-                  : (item[column.key] ?? "-")}
+                  : (item[column.key] != null ? String(item[column.key]) : "-")}
               </td>
             ))}
           </tr>

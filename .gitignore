@@ -64,6 +64,7 @@ yarn-error.log*
 
 # Testing
 /backend/coverage/
+/frontend/coverage/
 
 # RSpec
 /backend/.rspec_status
