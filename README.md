@@ -147,7 +147,7 @@ docker compose up
 ```bash
 cd backend
 bundle install
-rails db:create db:migrate db:seed
+rails db:prepare
 rails server  # Starts on port 3000
 ```
 
@@ -183,7 +183,7 @@ docker compose exec backend rails console
 
 ```bash
 cd backend
-rails db:migrate
+rails db:prepare
 rails db:reset
 rails console
 ```
