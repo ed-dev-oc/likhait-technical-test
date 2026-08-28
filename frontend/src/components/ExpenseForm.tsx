@@ -7,6 +7,8 @@ import { ExpenseFormData } from "../types";
 import { EXPENSE_CATEGORIES } from "../constants/categories";
 import { TextField, SelectBox, Button } from "../vibes";
 import { useExpenseForm } from "../hooks/useExpenseForm";
+import { formatDate } from "../utils/expenseUtils";
+import { COLORS } from "../constants/colors";
 
 interface ExpenseFormProps {
   initialData?: Partial<ExpenseFormData>;
@@ -23,7 +25,7 @@ export function ExpenseForm({
   onCancel,
   submitLabel = "Add Expense",
 }: ExpenseFormProps) {
-  const { formData, errors, isSubmitting, handleChange, handleSubmit } =
+  const { formData, errors, serverError, isSubmitting, handleChange, handleSubmit } =
     useExpenseForm({
       initialData,
       onSubmit,
@@ -41,6 +43,16 @@ export function ExpenseForm({
     marginTop: "0.5rem",
   };
 
+  const serverErrorStyle: React.CSSProperties = {
+    padding: "0.5rem 0.75rem",
+    backgroundColor: COLORS.red.re02,
+    border: `1px solid ${COLORS.danger}`,
+    borderRadius: "0.375rem",
+    color: COLORS.red.re10,
+    fontSize: "0.875rem",
+    fontWeight: 500,
+  };
+
   const availableCategoryList =
     categories && categories.length > 0 ? categories : (EXPENSE_CATEGORIES as readonly string[]);
 
@@ -55,7 +67,9 @@ export function ExpenseForm({
   }));
 
   return (
-    <form onSubmit={handleSubmit} style={formStyle}>
+    <form onSubmit={handleSubmit} style={formStyle} noValidate>
+      {serverError && <div style={serverErrorStyle}>{serverError}</div>}
+
       <TextField
         label="Amount"
         type="number"
@@ -94,6 +108,7 @@ export function ExpenseForm({
         type="date"
         value={formData.date}
         onChange={(e) => handleChange("date", e.target.value)}
+        max={formatDate(new Date())}
         error={errors.date}
         fullWidth
         required

@@ -20,18 +20,23 @@ export function useExpenseForm({ initialData, onSubmit }: UseExpenseFormProps) {
   });
 
   const [errors, setErrors] = useState<Partial<ExpenseFormData>>({});
+  const [serverError, setServerError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (field: keyof ExpenseFormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-    // Clear error for this field when user starts typing
+    // Clear error for this field and serverError when user starts typing
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: undefined }));
+    }
+    if (serverError) {
+      setServerError("");
     }
   };
 
   const validateForm = (): boolean => {
     const newErrors: Partial<ExpenseFormData> = {};
+    const today = formatDate(new Date());
 
     if (!formData.amount || Number(formData.amount) <= 0) {
       newErrors.amount = "Amount must be greater than 0";
@@ -47,6 +52,8 @@ export function useExpenseForm({ initialData, onSubmit }: UseExpenseFormProps) {
 
     if (!formData.date) {
       newErrors.date = "Date is required";
+    } else if (formData.date > today) {
+      newErrors.date = "Expense date cannot be in the future";
     }
 
     setErrors(newErrors);
@@ -61,6 +68,7 @@ export function useExpenseForm({ initialData, onSubmit }: UseExpenseFormProps) {
     }
 
     setIsSubmitting(true);
+    setServerError("");
     try {
       await onSubmit(formData);
       // Reset form on success
@@ -71,8 +79,13 @@ export function useExpenseForm({ initialData, onSubmit }: UseExpenseFormProps) {
         date: formatDate(new Date()),
       });
       setErrors({});
-    } catch (error) {
-      console.error("Form submission error:", error);
+      setServerError("");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setServerError(err.message);
+      } else {
+        setServerError("Failed to save expense");
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -86,11 +99,13 @@ export function useExpenseForm({ initialData, onSubmit }: UseExpenseFormProps) {
       date: initialData?.date || formatDate(new Date()),
     });
     setErrors({});
+    setServerError("");
   };
 
   return {
     formData,
     errors,
+    serverError,
     isSubmitting,
     handleChange,
     handleSubmit,
