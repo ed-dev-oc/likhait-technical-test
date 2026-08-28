@@ -47,8 +47,12 @@ export function CategoryForm({
       setIsSubmitting(true);
       setError("");
       await onSubmit(trimmedName);
-    } catch (err: any) {
-      setError(err?.message || "Failed to create category");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Failed to create category");
+      }
     } finally {
       setIsSubmitting(false);
     }
