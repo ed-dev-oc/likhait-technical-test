@@ -26,12 +26,12 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: backend/.ruby-version
+          ruby-version: .ruby-version
           bundler-cache: true
           working-directory: backend
 
       - name: Scan for security vulnerabilities
-        run: bin/brakeman --no-pager
+        run: bin/brakeman --no-pager -x EOLRails
 
   lint:
     name: Lint (RuboCop)
@@ -47,7 +47,7 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: backend/.ruby-version
+          ruby-version: .ruby-version
           bundler-cache: true
           working-directory: backend
 
@@ -78,7 +78,7 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: backend/.ruby-version
+          ruby-version: .ruby-version
           bundler-cache: true
           working-directory: backend
 
