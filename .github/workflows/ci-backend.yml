@@ -1,0 +1,95 @@
+name: Backend CI
+
+on:
+  pull_request:
+    paths:
+      - 'backend/**'
+      - '.github/workflows/ci-backend.yml'
+  push:
+    branches: [ main ]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/ci-backend.yml'
+
+jobs:
+  scan:
+    name: Security Scan (Brakeman)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: backend/.ruby-version
+          bundler-cache: true
+          working-directory: backend
+
+      - name: Scan for security vulnerabilities
+        run: bin/brakeman --no-pager
+
+  lint:
+    name: Lint (RuboCop)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: backend/.ruby-version
+          bundler-cache: true
+          working-directory: backend
+
+      - name: Lint code for consistent style
+        run: bin/rubocop -f github
+
+  test:
+    name: Tests (RSpec)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+          MYSQL_DATABASE: expense_system_test
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: backend/.ruby-version
+          bundler-cache: true
+          working-directory: backend
+
+      - name: Setup Database and Run Tests
+        env:
+          RAILS_ENV: test
+          DATABASE_HOST: 127.0.0.1
+          DATABASE_PORT: 3306
+          DATABASE_USERNAME: root
+          DATABASE_PASSWORD: ""
+          DATABASE_NAME: expense_system_test
+        run: |
+          bin/rails db:test:prepare
+          bundle exec rspec
