@@ -1,5 +1,7 @@
 /**
  * Expense category constants
+ * @deprecated Categories are dynamically fetched from the backend API.
+ * This constant is retained for legacy type compatibility.
  */
 
 export const EXPENSE_CATEGORIES = [

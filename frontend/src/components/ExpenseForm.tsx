@@ -1,10 +1,5 @@
-/**
- * Form component for adding/editing expenses
- */
-
 import React from "react";
-import { ExpenseFormData } from "../types";
-import { EXPENSE_CATEGORIES } from "../constants/categories";
+import { Category, ExpenseFormData } from "../types";
 import { TextField, SelectBox, Button } from "../vibes";
 import { useExpenseForm } from "../hooks/useExpenseForm";
 import { formatDate } from "../utils/expenseUtils";
@@ -12,7 +7,7 @@ import { COLORS } from "../constants/colors";
 
 interface ExpenseFormProps {
   initialData?: Partial<ExpenseFormData>;
-  categories?: string[];
+  categories?: (Category | string)[];
   onSubmit: (data: ExpenseFormData) => Promise<void>;
   onCancel?: () => void;
   submitLabel?: string;
@@ -20,15 +15,33 @@ interface ExpenseFormProps {
 
 export function ExpenseForm({
   initialData,
-  categories,
+  categories = [],
   onSubmit,
   onCancel,
   submitLabel = "Add Expense",
 }: ExpenseFormProps) {
+  const handleFormSubmit = async (data: ExpenseFormData) => {
+    // Resolve category_id from the category list
+    let categoryId = data.category_id;
+    if (!categoryId && data.category) {
+      const matched = categories.find((c) =>
+        typeof c === "object" ? c.name === data.category : c === data.category,
+      );
+      if (matched && typeof matched === "object") {
+        categoryId = matched.id;
+      }
+    }
+
+    await onSubmit({
+      ...data,
+      category_id: categoryId,
+    });
+  };
+
   const { formData, errors, serverError, isSubmitting, handleChange, handleSubmit } =
     useExpenseForm({
       initialData,
-      onSubmit,
+      onSubmit: handleFormSubmit,
     });
 
   const formStyle: React.CSSProperties = {
@@ -53,18 +66,23 @@ export function ExpenseForm({
     fontWeight: 500,
   };
 
-  const availableCategoryList =
-    categories && categories.length > 0 ? categories : (EXPENSE_CATEGORIES as readonly string[]);
+  const categoryNameList = categories.map((c) => (typeof c === "object" ? c.name : c));
 
   const allCategoryNames =
-    formData.category && !availableCategoryList.includes(formData.category)
-      ? [formData.category, ...availableCategoryList]
-      : availableCategoryList;
+    formData.category && !categoryNameList.includes(formData.category)
+      ? [formData.category, ...categoryNameList]
+      : categoryNameList;
 
-  const categoryOptions = allCategoryNames.map((category) => ({
-    value: category,
-    label: category,
-  }));
+  const categoryOptions = allCategoryNames.map((categoryName) => {
+    const matched = categories.find((c) =>
+      typeof c === "object" ? c.name === categoryName : c === categoryName,
+    );
+    const emoji = matched && typeof matched === "object" && matched.emoji ? `${matched.emoji} ` : "";
+    return {
+      value: categoryName,
+      label: `${emoji}${categoryName}`,
+    };
+  });
 
   return (
     <form onSubmit={handleSubmit} style={formStyle} noValidate>

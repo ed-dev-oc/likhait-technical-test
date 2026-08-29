@@ -34,9 +34,7 @@ export function CalendarExpenseTable({
     return getCategoryEmoji(categoryName);
   };
 
-  const categoryNames = categories?.map((c) =>
-    typeof c === "string" ? c : c.name,
-  );
+
 
 
   const totalPages = Math.ceil(expenses.length / ITEMS_PER_PAGE);
@@ -203,9 +201,10 @@ export function CalendarExpenseTable({
               amount: editingExpense.amount.toString(),
               description: editingExpense.description,
               category: editingExpense.category,
+              category_id: editingExpense.category_id,
               date: formatDate(editingExpense.date),
             }}
-            categories={categoryNames}
+            categories={categories}
             onSubmit={handleUpdate}
             onCancel={() => {
               setIsEditModalOpen(false);
