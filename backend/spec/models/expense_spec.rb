@@ -49,10 +49,15 @@ RSpec.describe Expense, type: :model do
         expect(expense.errors[:amount]).to include("must be greater than 0")
       end
 
-      it "is invalid with an amount of 1,000,000 or greater" do
-        expense = Expense.new(description: "Huge expense", amount: 1_000_000, category: category, date: Date.current)
+      it "is valid with maximum allowed amount of 99,999,999.99" do
+        expense = Expense.new(description: "Max expense", amount: 99_999_999.99, category: category, date: Date.current)
+        expect(expense).to be_valid
+      end
+
+      it "is invalid with an amount of 100,000,000 or greater" do
+        expense = Expense.new(description: "Huge expense", amount: 100_000_000, category: category, date: Date.current)
         expect(expense).not_to be_valid
-        expect(expense.errors[:amount]).to include("must be less than 1000000")
+        expect(expense.errors[:amount]).to include("must be less than 100000000")
       end
     end
 
