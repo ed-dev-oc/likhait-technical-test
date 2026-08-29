@@ -104,6 +104,36 @@ describe("CategoryForm — client-side validation", () => {
     ).toBeInTheDocument();
   });
 
+  it("shows an error when emoji input is non-emoji text", async () => {
+    const user = userEvent.setup();
+    render(<CategoryForm onSubmit={noop} />);
+
+    await user.type(screen.getByRole("textbox", { name: /category name/i }), "Music");
+    const emojiInput = screen.getByRole("textbox", { name: /category emoji/i });
+    await user.clear(emojiInput);
+    await user.type(emojiInput, "text");
+    await user.click(screen.getByRole("button", { name: /create category/i }));
+
+    expect(
+      await screen.findByText(/single valid emoji/i),
+    ).toBeInTheDocument();
+  });
+
+  it("shows an error when emoji input has multiple emojis", async () => {
+    const user = userEvent.setup();
+    render(<CategoryForm onSubmit={noop} />);
+
+    await user.type(screen.getByRole("textbox", { name: /category name/i }), "Music");
+    const emojiInput = screen.getByRole("textbox", { name: /category emoji/i });
+    await user.clear(emojiInput);
+    await user.type(emojiInput, "🍔🍕");
+    await user.click(screen.getByRole("button", { name: /create category/i }));
+
+    expect(
+      await screen.findByText(/single valid emoji/i),
+    ).toBeInTheDocument();
+  });
+
   it("clears the error message when the user starts typing after a validation failure", async () => {
     const user = userEvent.setup();
     render(<CategoryForm onSubmit={noop} />);
@@ -122,10 +152,11 @@ describe("CategoryForm — client-side validation", () => {
   });
 });
 
+
 // ─── successful submission ────────────────────────────────────────────────────
 
 describe("CategoryForm — successful submission", () => {
-  it("calls onSubmit with the trimmed category name", async () => {
+  it("calls onSubmit with the trimmed category name and default emoji", async () => {
     const user = userEvent.setup();
     const mockSubmit = jest.fn().mockResolvedValue(undefined);
     render(<CategoryForm onSubmit={mockSubmit} />);
@@ -136,7 +167,22 @@ describe("CategoryForm — successful submission", () => {
     );
     await user.click(screen.getByRole("button", { name: /create category/i }));
 
-    await waitFor(() => expect(mockSubmit).toHaveBeenCalledWith("Subscriptions"));
+    await waitFor(() => expect(mockSubmit).toHaveBeenCalledWith("Subscriptions", "📦"));
+  });
+
+  it("calls onSubmit with custom selected emoji", async () => {
+    const user = userEvent.setup();
+    const mockSubmit = jest.fn().mockResolvedValue(undefined);
+    render(<CategoryForm onSubmit={mockSubmit} />);
+
+    await user.type(
+      screen.getByRole("textbox", { name: /category name/i }),
+      "Gaming",
+    );
+    await user.click(screen.getByRole("button", { name: "🎮" }));
+    await user.click(screen.getByRole("button", { name: /create category/i }));
+
+    await waitFor(() => expect(mockSubmit).toHaveBeenCalledWith("Gaming", "🎮"));
   });
 
   it("shows 'Creating...' label on the submit button while submitting", async () => {
@@ -156,6 +202,7 @@ describe("CategoryForm — successful submission", () => {
     ).toBeInTheDocument();
   });
 });
+
 
 // ─── server-side error handling ───────────────────────────────────────────────
 
