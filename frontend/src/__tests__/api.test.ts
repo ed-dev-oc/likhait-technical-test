@@ -3,6 +3,7 @@ import {
   createCategory,
   fetchExpenses,
   getExpenses,
+  fetchMonthlySummary,
   createExpense,
   updateExpense,
   deleteExpense,
@@ -81,6 +82,44 @@ describe("api service", () => {
       const result = await getExpenses(2026, 8);
       expect(global.fetch).toHaveBeenCalledWith("http://localhost:3000/api/expenses?year=2026&month=8");
       expect(result).toEqual(mockExpenses);
+    });
+  });
+
+  describe("fetchMonthlySummary", () => {
+    it("fetches monthly summary filtered by year and month", async () => {
+      const mockSummary = {
+        total_amount: 150,
+        total_count: 3,
+        categories: [{ category_id: 1, category: "Food", emoji: "🍔", amount: 150, count: 3 }],
+      };
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockSummary,
+      });
+
+      const result = await fetchMonthlySummary(2026, 8);
+      expect(global.fetch).toHaveBeenCalledWith("http://localhost:3000/api/expenses/summary?year=2026&month=8");
+      expect(result).toEqual(mockSummary);
+    });
+
+    it("fetches summary without params when not provided", async () => {
+      const mockSummary = { total_amount: 0, total_count: 0, categories: [] };
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockSummary,
+      });
+
+      const result = await fetchMonthlySummary();
+      expect(global.fetch).toHaveBeenCalledWith("http://localhost:3000/api/expenses/summary");
+      expect(result).toEqual(mockSummary);
+    });
+
+    it("throws an error when summary request fails", async () => {
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: false,
+      });
+
+      await expect(fetchMonthlySummary(2026, 8)).rejects.toThrow("Failed to fetch expense summary");
     });
   });
 
