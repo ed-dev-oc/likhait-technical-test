@@ -81,14 +81,19 @@ export async function createCategory(
  * Create a new expense
  */
 export async function createExpense(data: ExpenseFormData): Promise<Expense> {
-  // Convert category name to category_id
-  const categories = await fetchCategories();
-  const category = categories.find((c) => c.name === data.category);
+  let categoryId = data.category_id;
+
+  // Fallback: only lookup by name if category_id was not explicitly provided
+  if (!categoryId && data.category) {
+    const categories = await fetchCategories();
+    const category = categories.find((c) => c.name === data.category);
+    categoryId = category?.id;
+  }
 
   const expenseData = {
     description: data.description,
     amount: data.amount,
-    category_id: category?.id,
+    category_id: categoryId,
     date: data.date,
   };
 
@@ -130,7 +135,9 @@ export async function updateExpense(
   if (data.date !== undefined) {
     expenseData.date = data.date;
   }
-  if (data.category !== undefined) {
+  if (data.category_id !== undefined) {
+    expenseData.category_id = data.category_id;
+  } else if (data.category !== undefined) {
     const categories = await fetchCategories();
     const category = categories.find((c) => c.name === data.category);
     expenseData.category_id = category?.id;

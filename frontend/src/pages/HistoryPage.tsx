@@ -66,11 +66,7 @@ const HistoryPage: React.FC = () => {
     loadCategories();
   }, []);
 
-  useEffect(() => {
-    fetchExpenses();
-  }, [selectedYear, selectedMonth]);
-
-  const fetchExpenses = async () => {
+  const loadExpenses = async () => {
     try {
       setLoading(true);
       const data = await getExpenses(selectedYear, selectedMonth);
@@ -81,6 +77,10 @@ const HistoryPage: React.FC = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadExpenses();
+  }, [selectedYear, selectedMonth]);
 
   const handleYearChange = (year: number) => {
     setSelectedYear(year);
@@ -96,7 +96,7 @@ const HistoryPage: React.FC = () => {
     try {
       await createExpense(data);
       setIsModalOpen(false);
-      fetchExpenses();
+      loadExpenses();
     } catch (error) {
       console.error("Error creating expense:", error);
       throw error;
@@ -208,7 +208,7 @@ const HistoryPage: React.FC = () => {
               <CalendarExpenseTable
                 expenses={expenses}
                 categories={availableCategories}
-                onExpenseUpdated={fetchExpenses}
+                onExpenseUpdated={loadExpenses}
               />
             </div>
           </>
@@ -222,7 +222,7 @@ const HistoryPage: React.FC = () => {
         title="Add New Expense"
       >
         <ExpenseForm
-          categories={categoryNames}
+          categories={availableCategories}
           onSubmit={handleAddExpense}
           onCancel={() => setIsModalOpen(false)}
         />
