@@ -116,6 +116,44 @@ RSpec.describe "Api::Expenses", type: :request do
         json = JSON.parse(response.body)
         expect(json["errors"]).to include("Date can't be blank")
       end
+
+      it "with missing description" do
+        missing_desc_params = {
+          expense: {
+            description: "",
+            amount: 50.00,
+            category_id: food_category.id,
+            date: Date.current
+          }
+        }
+
+        expect {
+          post "/api/expenses", params: missing_desc_params, as: :json
+        }.not_to change(Expense, :count)
+
+        expect(response).to have_http_status(:unprocessable_entity)
+        json = JSON.parse(response.body)
+        expect(json["errors"]).to include("Description can't be blank")
+      end
+
+      it "with non-positive amount" do
+        invalid_amount_params = {
+          expense: {
+            description: "Free lunch",
+            amount: 0,
+            category_id: food_category.id,
+            date: Date.current
+          }
+        }
+
+        expect {
+          post "/api/expenses", params: invalid_amount_params, as: :json
+        }.not_to change(Expense, :count)
+
+        expect(response).to have_http_status(:unprocessable_entity)
+        json = JSON.parse(response.body)
+        expect(json["errors"]).to include("Amount must be greater than 0")
+      end
     end
   end
 
@@ -137,6 +175,15 @@ RSpec.describe "Api::Expenses", type: :request do
         json = JSON.parse(response.body)
         expect(json["errors"]).to include("Date cannot be in the future")
         expect(existing_expense.reload.date).to eq(Date.yesterday)
+      end
+    end
+
+    context "with invalid amount" do
+      it "returns unprocessable entity" do
+        patch "/api/expenses/#{existing_expense.id}", params: { expense: { amount: -10 } }, as: :json
+        expect(response).to have_http_status(:unprocessable_entity)
+        json = JSON.parse(response.body)
+        expect(json["errors"]).to include("Amount must be greater than 0")
       end
     end
   end
