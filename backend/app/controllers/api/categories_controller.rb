@@ -17,6 +17,6 @@ class Api::CategoriesController < ApplicationController
   private
 
   def category_params
-    params.require(:category).permit(:name)
+    params.require(:category).permit(:name, :emoji)
   end
 end

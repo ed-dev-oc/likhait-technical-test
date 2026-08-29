@@ -1,4 +1,5 @@
 import React from "react";
+import { Category } from "../types";
 import { CATEGORY_EMOJIS } from "../constants/categoryEmojis";
 import { COLORS } from "../constants/colors";
 
@@ -10,16 +11,23 @@ interface CategoryData {
 
 interface CategoryBreakdownProps {
   categories: CategoryData[];
+  categoryList?: Category[];
   total: number;
   totalCount: number;
 }
 
 const CategoryBreakdown: React.FC<CategoryBreakdownProps> = ({
   categories,
+  categoryList,
   total,
   totalCount,
 }) => {
   const [isCollapsed, setIsCollapsed] = React.useState(true);
+
+  const getEmoji = (catName: string) => {
+    const found = categoryList?.find((c) => c.name === catName);
+    return found?.emoji || CATEGORY_EMOJIS[catName] || "📦";
+  };
 
   const formatAmount = (amount: number) => {
     return `$${amount.toFixed(2)}`;
@@ -200,7 +208,7 @@ const CategoryBreakdown: React.FC<CategoryBreakdownProps> = ({
             >
               <div style={itemInfoStyle}>
                 <span style={itemIconStyle}>
-                  {CATEGORY_EMOJIS[category.category] || "📊"}
+                  {getEmoji(category.category)}
                 </span>
                 <div style={itemDetailsStyle}>
                   <div style={itemNameStyle}>{category.category}</div>

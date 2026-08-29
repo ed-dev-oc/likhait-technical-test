@@ -5,22 +5,10 @@ Category.destroy_all
 
 # Create categories
 puts "Creating categories..."
-categories = [
-  'Food',
-  'Transportation',
-  'Shopping',
-  'Entertainment',
-  'Bills',
-  'Healthcare',
-  'Education',
-  'Travel',
-  'Personal',
-  'Other'
-]
-
-created_categories = categories.map do |cat_name|
-  Category.create!(name: cat_name)
+created_categories = Category::DEFAULT_CATEGORIES.map do |cat|
+  Category.create!(name: cat[:name], emoji: cat[:emoji])
 end
+
 
 puts "Created #{created_categories.count} categories"
 
