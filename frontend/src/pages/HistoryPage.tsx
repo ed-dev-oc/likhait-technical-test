@@ -122,7 +122,7 @@ const HistoryPage: React.FC = () => {
   const categoryNames = availableCategories.map((c) => c.name);
 
   const pageStyle: React.CSSProperties = {
-    padding: "48px 64px",
+    padding: "32px 32px",
     minHeight: "100vh",
     background: COLORS.secondary.s01,
   };

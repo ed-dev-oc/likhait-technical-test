@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Category } from "../types";
 import { CATEGORY_EMOJIS } from "../constants/categoryEmojis";
 import { COLORS } from "../constants/colors";
@@ -23,7 +23,7 @@ const CategoryBreakdown: React.FC<CategoryBreakdownProps> = ({
   total,
   totalCount,
 }) => {
-  const [isCollapsed, setIsCollapsed] = React.useState(true);
+  const [isCollapsed, setIsCollapsed] = useState(true);
 
   const getEmoji = (cat: CategoryData | string) => {
     if (typeof cat !== "string" && cat.emoji) return cat.emoji;
@@ -193,37 +193,50 @@ const CategoryBreakdown: React.FC<CategoryBreakdownProps> = ({
 
       {!isCollapsed && (
         <div style={listStyle}>
-          {categories.map((category) => (
+          {categories.length === 0 ? (
             <div
-              key={category.category}
-              style={itemStyle}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = COLORS.secondary.s02;
-                e.currentTarget.style.transform = "translateY(-2px)";
-                e.currentTarget.style.boxShadow =
-                  "0 4px 12px rgba(0, 0, 0, 0.1)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = COLORS.secondary.s01;
-                e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.boxShadow = "none";
+              style={{
+                padding: "24px",
+                textAlign: "center",
+                color: COLORS.secondary.s08,
+                fontSize: "15px",
               }}
             >
-              <div style={itemInfoStyle}>
-                <span style={itemIconStyle}>
-                  {getEmoji(category.category)}
-                </span>
-                <div style={itemDetailsStyle}>
-                  <div style={itemNameStyle}>{category.category}</div>
-                  <div style={itemCountStyle}>
-                    {category.count} transaction
-                    {category.count !== 1 ? "s" : ""}
+              No expenses for this month.
+            </div>
+          ) : (
+            categories.map((category) => (
+              <div
+                key={category.category}
+                style={itemStyle}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = COLORS.secondary.s02;
+                  e.currentTarget.style.transform = "translateY(-2px)";
+                  e.currentTarget.style.boxShadow =
+                    "0 4px 12px rgba(0, 0, 0, 0.1)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = COLORS.secondary.s01;
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow = "none";
+                }}
+              >
+                <div style={itemInfoStyle}>
+                  <span style={itemIconStyle}>
+                    {getEmoji(category.category)}
+                  </span>
+                  <div style={itemDetailsStyle}>
+                    <div style={itemNameStyle}>{category.category}</div>
+                    <div style={itemCountStyle}>
+                      {category.count} transaction
+                      {category.count !== 1 ? "s" : ""}
+                    </div>
                   </div>
                 </div>
+                <div style={itemAmountStyle}>{formatAmount(category.amount)}</div>
               </div>
-              <div style={itemAmountStyle}>{formatAmount(category.amount)}</div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       )}
     </div>
