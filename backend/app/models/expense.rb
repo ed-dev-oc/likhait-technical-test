@@ -45,6 +45,19 @@ class Expense < ApplicationRecord
     }
   end
 
+  def as_json(options = nil)
+    {
+      id: id,
+      description: description,
+      amount: amount.to_f,
+      category: category&.name,
+      category_id: category_id,
+      date: date.to_s,
+      created_at: created_at,
+      updated_at: updated_at
+    }
+  end
+
   private
 
   def date_cannot_be_in_the_future
