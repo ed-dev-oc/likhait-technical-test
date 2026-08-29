@@ -2,7 +2,7 @@
  * API service for communicating with the backend
  */
 
-import { Category, Expense, ExpenseFormData, ExpenseSummary } from "../types";
+import { Category, Expense, ExpenseFormData, ExpenseSummary, PaginatedExpenses } from "../types";
 
 const API_BASE_URL = "http://localhost:3000/api";
 
@@ -23,14 +23,56 @@ export async function fetchExpenses(): Promise<Expense[]> {
 export async function getExpenses(
   year: number,
   month: number,
+  page?: number,
+  perPage?: number,
 ): Promise<Expense[]> {
-  const response = await fetch(
-    `${API_BASE_URL}/expenses?year=${year}&month=${month}`,
-  );
+  const params = new URLSearchParams();
+  params.set("year", year.toString());
+  params.set("month", month.toString());
+  if (page !== undefined) params.set("page", page.toString());
+  if (perPage !== undefined) params.set("per_page", perPage.toString());
+
+  const response = await fetch(`${API_BASE_URL}/expenses?${params.toString()}`);
   if (!response.ok) {
     throw new Error("Failed to fetch expenses");
   }
   return response.json();
+}
+
+/**
+ * Fetch paginated expenses along with pagination metadata from headers
+ */
+export async function fetchPaginatedExpenses(
+  year: number,
+  month: number,
+  page: number = 1,
+  perPage: number = 10,
+): Promise<PaginatedExpenses> {
+  const params = new URLSearchParams({
+    year: year.toString(),
+    month: month.toString(),
+    page: page.toString(),
+    per_page: perPage.toString(),
+  });
+
+  const response = await fetch(`${API_BASE_URL}/expenses?${params.toString()}`);
+  if (!response.ok) {
+    throw new Error("Failed to fetch expenses");
+  }
+
+  const expenses: Expense[] = await response.json();
+  const totalCount = parseInt(response.headers.get("X-Total-Count") || "0", 10) || expenses.length;
+  const totalPages = parseInt(response.headers.get("X-Total-Pages") || "1", 10) || 1;
+  const currentPage = parseInt(response.headers.get("X-Current-Page") || page.toString(), 10) || page;
+  const parsedPerPage = parseInt(response.headers.get("X-Per-Page") || perPage.toString(), 10) || perPage;
+
+  return {
+    expenses,
+    totalCount,
+    totalPages,
+    currentPage,
+    perPage: parsedPerPage,
+  };
 }
 
 /**

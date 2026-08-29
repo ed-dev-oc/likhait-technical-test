@@ -19,6 +19,14 @@ export interface Expense {
   updated_at: string;
 }
 
+export interface PaginatedExpenses {
+  expenses: Expense[];
+  totalCount: number;
+  totalPages: number;
+  currentPage: number;
+  perPage: number;
+}
+
 export interface ExpenseFormData {
   amount: string;
   description: string;

@@ -83,6 +83,47 @@ describe("api service", () => {
       expect(global.fetch).toHaveBeenCalledWith("http://localhost:3000/api/expenses?year=2026&month=8");
       expect(result).toEqual(mockExpenses);
     });
+
+    it("fetches expenses with pagination params", async () => {
+      const mockExpenses = [{ id: 1, description: "Lunch", amount: 20, category: "Food", date: "2026-08-15" }];
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockExpenses,
+      });
+
+      const result = await getExpenses(2026, 8, 2, 5);
+      expect(global.fetch).toHaveBeenCalledWith("http://localhost:3000/api/expenses?year=2026&month=8&page=2&per_page=5");
+      expect(result).toEqual(mockExpenses);
+    });
+  });
+
+  describe("fetchPaginatedExpenses", () => {
+    it("fetches paginated expenses with headers metadata parsed", async () => {
+      const mockExpenses = [{ id: 1, description: "Lunch", amount: 20, category: "Food", date: "2026-08-15" }];
+      const headers = new Headers({
+        "X-Total-Count": "25",
+        "X-Total-Pages": "3",
+        "X-Current-Page": "1",
+        "X-Per-Page": "10",
+      });
+
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockExpenses,
+        headers,
+      });
+
+      const { fetchPaginatedExpenses } = await import("../services/api");
+      const result = await fetchPaginatedExpenses(2026, 8, 1, 10);
+      expect(global.fetch).toHaveBeenCalledWith("http://localhost:3000/api/expenses?year=2026&month=8&page=1&per_page=10");
+      expect(result).toEqual({
+        expenses: mockExpenses,
+        totalCount: 25,
+        totalPages: 3,
+        currentPage: 1,
+        perPage: 10,
+      });
+    });
   });
 
   describe("fetchMonthlySummary", () => {
