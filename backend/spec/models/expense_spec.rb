@@ -177,5 +177,21 @@ RSpec.describe Expense, type: :model do
         expect(summary[:categories]).to eq([])
       end
     end
+
+    describe "#as_json" do
+      it "formats expense attributes including category name and date string" do
+        json = expense1.as_json
+        expect(json).to include(
+          id: expense1.id,
+          description: "Burger",
+          amount: 15.0,
+          category: "Food",
+          category_id: food_cat.id,
+          date: "2026-08-10",
+          created_at: expense1.created_at,
+          updated_at: expense1.updated_at
+        )
+      end
+    end
   end
 end
