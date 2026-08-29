@@ -2,7 +2,7 @@
  * API service for communicating with the backend
  */
 
-import { Category, Expense, ExpenseFormData } from "../types";
+import { Category, Expense, ExpenseFormData, ExpenseSummary } from "../types";
 
 const API_BASE_URL = "http://localhost:3000/api";
 
@@ -29,6 +29,24 @@ export async function getExpenses(
   );
   if (!response.ok) {
     throw new Error("Failed to fetch expenses");
+  }
+  return response.json();
+}
+
+/**
+ * Fetch monthly expense summary metrics (total amount, total count, category breakdown)
+ */
+export async function fetchMonthlySummary(
+  year?: number,
+  month?: number,
+): Promise<ExpenseSummary> {
+  const query =
+    year !== undefined && month !== undefined
+      ? `?year=${year}&month=${month}`
+      : "";
+  const response = await fetch(`${API_BASE_URL}/expenses/summary${query}`);
+  if (!response.ok) {
+    throw new Error("Failed to fetch expense summary");
   }
   return response.json();
 }

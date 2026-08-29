@@ -27,6 +27,20 @@ export interface ExpenseFormData {
   date: string;
 }
 
+export interface CategorySummary {
+  category_id: number;
+  category: string;
+  emoji: string;
+  amount: number;
+  count: number;
+}
+
+export interface ExpenseSummary {
+  total_amount: number;
+  total_count: number;
+  categories: CategorySummary[];
+}
+
 export interface MonthlySummary {
   totalExpenses: number;
   categoryBreakdown: CategoryBreakdown[];

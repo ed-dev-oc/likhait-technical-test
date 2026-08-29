@@ -15,5 +15,8 @@ Rails.application.routes.draw do
   namespace :api do
     resources :categories, only: [ :index, :create ]
     resources :expenses, only: [ :index, :create, :update, :destroy ]
+    namespace :expenses do
+      get "summary", to: "summary#index"
+    end
   end
 end

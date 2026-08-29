@@ -112,4 +112,70 @@ RSpec.describe Expense, type: :model do
       end
     end
   end
+
+  describe "scopes and summary methods" do
+    let!(:food_cat) { Category.create!(name: "Food", emoji: "🍔") }
+    let!(:transport_cat) { Category.create!(name: "Transport", emoji: "🚗") }
+
+    let!(:expense1) { Expense.create!(description: "Burger", amount: 15.0, category: food_cat, date: Date.new(2026, 8, 10)) }
+    let!(:expense2) { Expense.create!(description: "Pizza", amount: 25.0, category: food_cat, date: Date.new(2026, 8, 20)) }
+    let!(:expense3) { Expense.create!(description: "Bus", amount: 10.0, category: transport_cat, date: Date.new(2026, 8, 15)) }
+    let!(:other_month_expense) { Expense.create!(description: "Old Coffee", amount: 5.0, category: food_cat, date: Date.new(2026, 7, 1)) }
+
+    describe ".by_month" do
+      it "filters by year and month" do
+        results = Expense.by_month(2026, 8)
+        expect(results).to contain_exactly(expense1, expense2, expense3)
+      end
+
+      it "returns all expenses if year or month is blank" do
+        expect(Expense.by_month(nil, nil).count).to eq(4)
+      end
+    end
+
+    describe ".category_breakdown" do
+      it "aggregates totals and counts per category ordered by total amount descending" do
+        results = Expense.by_month(2026, 8).category_breakdown
+        expect(results.length).to eq(2)
+        expect(results.first.category_name).to eq("Food")
+        expect(results.first.total_amount).to eq(40.0)
+        expect(results.first.total_count).to eq(2)
+        expect(results.first.category_emoji).to eq("🍔")
+        expect(results.second.category_name).to eq("Transport")
+        expect(results.second.total_amount).to eq(10.0)
+        expect(results.second.total_count).to eq(1)
+      end
+    end
+
+    describe ".summary_for" do
+      it "returns formatted summary hash with total_amount, total_count, and category breakdown" do
+        summary = Expense.summary_for(year: 2026, month: 8)
+        expect(summary[:total_amount]).to eq(50.0)
+        expect(summary[:total_count]).to eq(3)
+        expect(summary[:categories]).to eq([
+          {
+            category_id: food_cat.id,
+            category: "Food",
+            emoji: "🍔",
+            amount: 40.0,
+            count: 2
+          },
+          {
+            category_id: transport_cat.id,
+            category: "Transport",
+            emoji: "🚗",
+            amount: 10.0,
+            count: 1
+          }
+        ])
+      end
+
+      it "returns 0 values and empty categories when no expenses match" do
+        summary = Expense.summary_for(year: 2025, month: 1)
+        expect(summary[:total_amount]).to eq(0.0)
+        expect(summary[:total_count]).to eq(0)
+        expect(summary[:categories]).to eq([])
+      end
+    end
+  end
 end

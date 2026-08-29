@@ -7,6 +7,7 @@ interface CategoryData {
   category: string;
   amount: number;
   count: number;
+  emoji?: string;
 }
 
 interface CategoryBreakdownProps {
@@ -24,7 +25,9 @@ const CategoryBreakdown: React.FC<CategoryBreakdownProps> = ({
 }) => {
   const [isCollapsed, setIsCollapsed] = React.useState(true);
 
-  const getEmoji = (catName: string) => {
+  const getEmoji = (cat: CategoryData | string) => {
+    if (typeof cat !== "string" && cat.emoji) return cat.emoji;
+    const catName = typeof cat === "string" ? cat : cat.category;
     const found = categoryList?.find((c) => c.name === catName);
     return found?.emoji || CATEGORY_EMOJIS[catName] || "📦";
   };
