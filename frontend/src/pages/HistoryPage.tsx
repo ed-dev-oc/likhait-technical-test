@@ -103,8 +103,8 @@ const HistoryPage: React.FC = () => {
     }
   };
 
-  const handleAddCategory = async (name: string) => {
-    await createCategory(name);
+  const handleAddCategory = async (name: string, emoji?: string) => {
+    await createCategory(name, emoji);
     await loadCategories();
     setIsCategoryModalOpen(false);
   };
@@ -200,19 +200,21 @@ const HistoryPage: React.FC = () => {
           <>
             <CategoryBreakdown
               categories={categories}
+              categoryList={availableCategories}
               total={total}
               totalCount={totalCount}
             />
             <div style={{ marginTop: "32px" }}>
               <CalendarExpenseTable
                 expenses={expenses}
-                categories={categoryNames}
+                categories={availableCategories}
                 onExpenseUpdated={fetchExpenses}
               />
             </div>
           </>
         )}
       </div>
+
 
       <Modal
         isOpen={isModalOpen}

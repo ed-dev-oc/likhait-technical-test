@@ -1,9 +1,5 @@
-/**
- * Calendar expense table component
- */
-
 import React, { useState } from "react";
-import { Expense, ExpenseFormData } from "../types";
+import { Category, Expense, ExpenseFormData } from "../types";
 import { formatCurrency, formatDate } from "../utils/expenseUtils";
 import { getCategoryEmoji } from "../constants/categoryEmojis";
 import { COLORS } from "../constants/colors";
@@ -13,7 +9,7 @@ import { deleteExpense, updateExpense } from "../services/api";
 
 interface CalendarExpenseTableProps {
   expenses: Expense[];
-  categories?: string[];
+  categories?: (Category | string)[];
   onExpenseUpdated: () => void;
 }
 
@@ -29,6 +25,19 @@ export function CalendarExpenseTable({
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [deletingExpense, setDeletingExpense] = useState<Expense | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  const getEmoji = (categoryName: string) => {
+    if (categories && categories.length > 0 && typeof categories[0] === "object") {
+      const found = (categories as Category[]).find((c) => c.name === categoryName);
+      if (found?.emoji) return found.emoji;
+    }
+    return getCategoryEmoji(categoryName);
+  };
+
+  const categoryNames = categories?.map((c) =>
+    typeof c === "string" ? c : c.name,
+  );
+
 
   const totalPages = Math.ceil(expenses.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -144,7 +153,7 @@ export function CalendarExpenseTable({
                     gap: "0.5rem",
                   }}
                 >
-                  <span>{getCategoryEmoji(expense.category)}</span>
+                  <span>{getEmoji(expense.category)}</span>
                   <span>{expense.category}</span>
                 </span>
               </td>
@@ -196,7 +205,7 @@ export function CalendarExpenseTable({
               category: editingExpense.category,
               date: formatDate(new Date(editingExpense.date)),
             }}
-            categories={categories}
+            categories={categoryNames}
             onSubmit={handleUpdate}
             onCancel={() => {
               setIsEditModalOpen(false);
@@ -205,6 +214,7 @@ export function CalendarExpenseTable({
             submitLabel="Update Expense"
           />
         )}
+
       </Modal>
 
       <Modal
