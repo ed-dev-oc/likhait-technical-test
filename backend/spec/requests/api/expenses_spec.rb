@@ -5,7 +5,7 @@ RSpec.describe "Api::Expenses", type: :request do
   let!(:transport_category) { Category.create!(name: "Transport") }
 
   describe "GET /api/expenses" do
-    let!(:expense_today) { Expense.create!(description: "Lunch", amount: 100.00, category: food_category, date: Date.today) }
+    let!(:expense_today) { Expense.create!(description: "Lunch", amount: 100.00, category: food_category, date: Date.current) }
     let!(:expense_yesterday) { Expense.create!(description: "Taxi", amount: 50.00, category: transport_category, date: Date.yesterday) }
     let!(:expense_two_days_ago) { Expense.create!(description: "Dinner", amount: 120.00, category: food_category, date: 2.days.ago.to_date) }
 
@@ -25,18 +25,18 @@ RSpec.describe "Api::Expenses", type: :request do
     end
 
     it "returns expenses with the same date in descending order by created_at" do
-      same_day_first = Expense.create!(description: "Morning Coffee", amount: 20.00, category: food_category, date: Date.today, created_at: 2.hours.ago)
-      same_day_second = Expense.create!(description: "Afternoon Snack", amount: 30.00, category: food_category, date: Date.today, created_at: 1.hour.ago)
+      same_day_first = Expense.create!(description: "Morning Coffee", amount: 20.00, category: food_category, date: Date.current, created_at: 2.hours.ago)
+      same_day_second = Expense.create!(description: "Afternoon Snack", amount: 30.00, category: food_category, date: Date.current, created_at: 1.hour.ago)
 
       get "/api/expenses"
 
       json = JSON.parse(response.body)
-      today_expense_ids = json.select { |e| e["date"] == Date.today.to_s }.map { |e| e["id"] }
+      today_expense_ids = json.select { |e| e["date"] == Date.current.to_s }.map { |e| e["id"] }
       expect(today_expense_ids.index(same_day_second.id)).to be < today_expense_ids.index(same_day_first.id)
     end
 
     it "filters expenses by year and month based on expense date" do
-      current_date = Date.today
+      current_date = Date.current
       other_month_expense = Expense.create!(
         description: "Last Month Expense",
         amount: 200.00,
@@ -61,7 +61,7 @@ RSpec.describe "Api::Expenses", type: :request do
             description: "Team Lunch",
             amount: 150.50,
             category_id: food_category.id,
-            date: Date.today
+            date: Date.current
           }
         }
       end

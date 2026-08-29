@@ -41,6 +41,8 @@ services:
       DATABASE_NAME: expense_system_development
       DATABASE_USERNAME: root
       DATABASE_PASSWORD: rootpassword
+      TZ: Asia/Manila
+      APP_TIMEZONE: Asia/Manila
     ports:
       - "3000:3000"
     depends_on:
