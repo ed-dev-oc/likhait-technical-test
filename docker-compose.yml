@@ -2,15 +2,18 @@ services:
   db:
     image: mysql:8.0
     container_name: expense_system_db
+    env_file:
+      - .env
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: expense_system_development
-      MYSQL_USER: expense_user
-      MYSQL_PASSWORD: expense_password
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
     ports:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/01_init.sql:ro
     healthcheck:
       test:
         [
@@ -21,7 +24,7 @@ services:
           "localhost",
           "-u",
           "root",
-          "-prootpassword",
+          "-p${DB_ROOT_PASSWORD}",
         ]
       interval: 10s
       timeout: 5s
@@ -34,15 +37,18 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: expense_system_backend
+    env_file:
+      - .env
     environment:
       RAILS_ENV: development
       DATABASE_HOST: db
       DATABASE_PORT: 3306
-      DATABASE_NAME: expense_system_development
-      DATABASE_USERNAME: root
-      DATABASE_PASSWORD: rootpassword
-      TZ: Asia/Manila
-      APP_TIMEZONE: Asia/Manila
+      DATABASE_NAME: ${DB_NAME}
+      DATABASE_USERNAME: ${DB_USERNAME}
+      DATABASE_PASSWORD: ${DB_PASSWORD}
+      TZ: ${TZ}
+      APP_TIMEZONE: ${APP_TIMEZONE}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:5173}
     ports:
       - "3000:3000"
     depends_on:
