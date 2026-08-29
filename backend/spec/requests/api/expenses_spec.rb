@@ -211,5 +211,33 @@ RSpec.describe "Api::Expenses", type: :request do
         expect(json["errors"]).to include("Amount must be greater than 0")
       end
     end
+
+    context "with a non-existent expense ID" do
+      it "returns 404 not found with an error message" do
+        patch "/api/expenses/0", params: { expense: { description: "Ghost" } }, as: :json
+        expect(response).to have_http_status(:not_found)
+        json = JSON.parse(response.body)
+        expect(json["error"]).to eq("Expense not found")
+      end
+    end
+  end
+
+  describe "DELETE /api/expenses/:id" do
+    let!(:existing_expense) { Expense.create!(description: "To Be Deleted", amount: 30.0, category: food_category, date: Date.yesterday) }
+
+    it "destroys the expense and returns 204 No Content" do
+      expect {
+        delete "/api/expenses/#{existing_expense.id}"
+      }.to change(Expense, :count).by(-1)
+
+      expect(response).to have_http_status(:no_content)
+    end
+
+    it "returns 404 not found for a non-existent expense ID" do
+      delete "/api/expenses/0"
+      expect(response).to have_http_status(:not_found)
+      json = JSON.parse(response.body)
+      expect(json["error"]).to eq("Expense not found")
+    end
   end
 end
