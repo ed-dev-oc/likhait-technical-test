@@ -24,7 +24,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     position: "fixed",
     left: 0,
     top: 0,
-    transition: "width 0.1s ease",
+    transition: "width 0.3s ease",
   };
 
   const headerStyle: React.CSSProperties = {
