@@ -51,6 +51,31 @@ RSpec.describe "Api::Expenses", type: :request do
       ids = json.map { |e| e["id"] }
       expect(ids).not_to include(other_month_expense.id)
     end
+
+    context "with pagination parameters" do
+      it "paginates results and sets pagination headers" do
+        get "/api/expenses", params: { page: 1, per_page: 2 }
+
+        expect(response).to have_http_status(:success)
+        json = JSON.parse(response.body)
+        expect(json.length).to eq(2)
+        expect(json.map { |e| e["id"] }).to eq([ expense_today.id, expense_yesterday.id ])
+
+        expect(response.headers["X-Total-Count"]).to eq("3")
+        expect(response.headers["X-Total-Pages"]).to eq("2")
+        expect(response.headers["X-Current-Page"]).to eq("1")
+        expect(response.headers["X-Per-Page"]).to eq("2")
+      end
+
+      it "returns the second page properly" do
+        get "/api/expenses", params: { page: 2, per_page: 2 }
+
+        expect(response).to have_http_status(:success)
+        json = JSON.parse(response.body)
+        expect(json.length).to eq(1)
+        expect(json.map { |e| e["id"] }).to eq([ expense_two_days_ago.id ])
+      end
+    end
   end
 
   describe "POST /api/expenses" do
