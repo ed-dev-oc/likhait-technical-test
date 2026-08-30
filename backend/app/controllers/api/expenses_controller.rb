@@ -1,4 +1,5 @@
 class Api::ExpensesController < ApplicationController
+  include Paginatable
   before_action :set_expense, only: [ :update, :destroy ]
 
   def index
@@ -6,20 +7,7 @@ class Api::ExpensesController < ApplicationController
                       .by_month(params[:year], params[:month])
                       .order(date: :desc, created_at: :desc)
 
-    if params[:page].present?
-      page = [ params[:page].to_i, 1 ].max
-      per_page = params[:per_page].present? ? [ [ params[:per_page].to_i, 1 ].max, 100 ].min : 10
-      total_count = expenses.count
-      total_pages = (total_count.to_f / per_page).ceil
-
-      response.set_header("X-Total-Count", total_count.to_s)
-      response.set_header("X-Total-Pages", total_pages.to_s)
-      response.set_header("X-Current-Page", page.to_s)
-      response.set_header("X-Per-Page", per_page.to_s)
-
-      expenses = expenses.offset((page - 1) * per_page).limit(per_page)
-    end
-
+    expenses = paginate(expenses) if params[:page].present?
     render json: expenses
   end
 
