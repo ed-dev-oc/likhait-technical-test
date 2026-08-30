@@ -1,7 +1,6 @@
 import {
   fetchCategories,
   createCategory,
-  fetchExpenses,
   getExpenses,
   fetchMonthlySummary,
   createExpense,
@@ -59,18 +58,7 @@ describe("api service", () => {
     });
   });
 
-  describe("fetchExpenses & getExpenses", () => {
-    it("fetches all expenses", async () => {
-      const mockExpenses = [{ id: 1, description: "Lunch", amount: 20, category: "Food", date: "2026-08-15" }];
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockExpenses,
-      });
-
-      const result = await fetchExpenses();
-      expect(global.fetch).toHaveBeenCalledWith("http://localhost:3000/api/expenses");
-      expect(result).toEqual(mockExpenses);
-    });
+  describe("getExpenses", () => {
 
     it("fetches expenses filtered by year and month", async () => {
       const mockExpenses = [{ id: 1, description: "Lunch", amount: 20, category: "Food", date: "2026-08-15" }];

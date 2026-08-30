@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   getExpenses,
   fetchMonthlySummary,
@@ -41,9 +41,8 @@ const HistoryPage: React.FC = () => {
     };
   };
 
-  const initial = getInitialYearMonth();
-  const [selectedYear, setSelectedYear] = useState(initial.year);
-  const [selectedMonth, setSelectedMonth] = useState(initial.month);
+  const [selectedYear, setSelectedYear] = useState(() => getInitialYearMonth().year);
+  const [selectedMonth, setSelectedMonth] = useState(() => getInitialYearMonth().month);
 
   // Update URL when year or month changes
   const updateURL = (year: number, month: number) => {
@@ -59,20 +58,20 @@ const HistoryPage: React.FC = () => {
     updateURL(selectedYear, selectedMonth);
   }, []);
 
-  const loadCategories = async () => {
+  const loadCategories = useCallback(async () => {
     try {
       const data = await fetchCategories();
       setAvailableCategories(data);
     } catch (error) {
       console.error("Error fetching categories:", error);
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadCategories();
   }, []);
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
       const [expensesData, summaryData] = await Promise.all([
@@ -86,7 +85,7 @@ const HistoryPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedYear, selectedMonth]);
 
   useEffect(() => {
     loadData();
