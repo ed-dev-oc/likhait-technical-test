@@ -49,26 +49,3 @@ export interface ExpenseSummary {
   categories: CategorySummary[];
 }
 
-export interface MonthlySummary {
-  totalExpenses: number;
-  categoryBreakdown: CategoryBreakdown[];
-  topCategories: TopCategory[];
-}
-
-export interface CategoryBreakdown {
-  category: string;
-  total: number;
-  percentage: number;
-}
-
-export interface TopCategory {
-  category: string;
-  total: number;
-  count: number;
-}
-
-export interface DayExpenses {
-  day: number;
-  expenses: Expense[];
-  total: number;
-}

@@ -6,16 +6,7 @@ import { Category, Expense, ExpenseFormData, ExpenseSummary, PaginatedExpenses }
 
 const API_BASE_URL = "http://localhost:3000/api";
 
-/**
- * Fetch all expenses
- */
-export async function fetchExpenses(): Promise<Expense[]> {
-  const response = await fetch(`${API_BASE_URL}/expenses`);
-  if (!response.ok) {
-    throw new Error("Failed to fetch expenses");
-  }
-  return response.json();
-}
+
 
 /**
  * Fetch expenses for a specific year and month
